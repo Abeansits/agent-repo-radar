@@ -1,4 +1,5 @@
 import axios from 'axios';
+import fs from 'fs/promises';
 
 // Interface to store repository information
 interface Repo {
@@ -28,46 +29,145 @@ function calculateAggregateScore(repo: Repo): number {
   const watchersScore = repo.watchers_count * 0.15;
   const ageScore = Math.min(ageInDays / 365, 5) * 2; // Max 10 points for 5 years or older
   const updateScore = Math.max(0, 15 - daysSinceUpdate / 30); // Max 15 points, decreasing by 1 point per month
-  const topicScore = repo.topics.length * 3; // 3 points per topic, up to 5 topics (15 points max)
+  // TODO: topicScore should be based on specific topics
+  const topicScore = Math.min(repo.topics.length, 5) * 3; // 3 points per topic, up to 5 topics (15 points max)
 
   return starScore + forkScore + watchersScore + ageScore + updateScore + topicScore;
 }
 
+// Fetch raw repository data from GitHub API
+async function fetchRepoRawData(repoUrl: string, githubToken: string): Promise<any | null> {
+  const repoPath = repoUrl.replace('https://github.com/', '');
+  const apiUrl = `https://api.github.com/repos/${repoPath}`;
+
+  try {
+    const response = await axios.get(apiUrl, {
+      headers: {
+        'User-Agent': 'request',
+        'Authorization': `token ${githubToken}`,
+        'Accept': 'application/vnd.github.mercy-preview+json', // Required to fetch topics
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error(`Failed to fetch data for ${repoUrl}: ${error.message}`);
+    return null;
+  }
+}
+
+// Transform raw repository data into Repo interface
+function transformRepoData(rawData: any, repoUrl: string): Repo {
+  const repo: Repo = {
+    url: repoUrl,
+    star_count: rawData.stargazers_count,
+    name: rawData.name,
+    description: rawData.description || '',
+    fork_count: rawData.forks_count,
+    watchers_count: rawData.watchers_count,
+    created_at: rawData.created_at,
+    updated_at: rawData.updated_at,
+    pushed_at: rawData.pushed_at,
+    topics: rawData.topics || [],
+    aggregate_score: 0,
+  };
+  repo.aggregate_score = calculateAggregateScore(repo);
+  return repo;
+}
+
+// Fetch and transform repository data
+async function fetchRepoData(repoUrl: string, githubToken: string): Promise<Repo | null> {
+  const rawData = await fetchRepoRawData(repoUrl, githubToken);
+  if (rawData) {
+    return transformRepoData(rawData, repoUrl);
+  }
+  return null;
+}
+
+// Update min and max values based on repository data
+function updateMinMaxValues(repo: Repo, minMax: any): void {
+  minMax.minStars = Math.min(minMax.minStars, repo.star_count);
+  minMax.maxStars = Math.max(minMax.maxStars, repo.star_count);
+  minMax.minForks = Math.min(minMax.minForks, repo.fork_count);
+  minMax.maxForks = Math.max(minMax.maxForks, repo.fork_count);
+  minMax.minWatchers = Math.min(minMax.minWatchers, repo.watchers_count);
+  minMax.maxWatchers = Math.max(minMax.maxWatchers, repo.watchers_count);
+
+  const updatedSinceDays = (new Date().getTime() - new Date(repo.updated_at).getTime()) / (1000 * 60 * 60 * 24);
+  minMax.minUpdatedSinceDays = Math.min(minMax.minUpdatedSinceDays, updatedSinceDays);
+  minMax.maxUpdatedSinceDays = Math.max(minMax.maxUpdatedSinceDays, updatedSinceDays);
+
+  const createdSinceDays = (new Date().getTime() - new Date(repo.created_at).getTime()) / (1000 * 60 * 60 * 24);
+  minMax.minCreatedSinceDays = Math.min(minMax.minCreatedSinceDays, createdSinceDays);
+  minMax.maxCreatedSinceDays = Math.max(minMax.maxCreatedSinceDays, createdSinceDays);
+
+  const pushedSinceDays = (new Date().getTime() - new Date(repo.pushed_at).getTime()) / (1000 * 60 * 60 * 24);
+  minMax.minPushedSinceDays = Math.min(minMax.minPushedSinceDays, pushedSinceDays);
+  minMax.maxPushedSinceDays = Math.max(minMax.maxPushedSinceDays, pushedSinceDays);
+}
+
+// Extract GitHub repository URLs from content
+function extractGitHubRepoUrls(content: string): Set<string> {
+  const githubRepoUrls = new Set<string>();
+  const repoUrlRegex = /https:\/\/github\.com\/[a-zA-Z0-9_-]+\/[a-zA-Z0-9_.-]+/g;
+  const matches = content.match(repoUrlRegex);
+  if (matches) {
+    matches.forEach((url) => githubRepoUrls.add(url));
+  }
+  return githubRepoUrls;
+}
+
+// Initialize min and max values
+function initializeMinMax(): any {
+  return {
+    minStars: Infinity, maxStars: -Infinity,
+    minForks: Infinity, maxForks: -Infinity,
+    minWatchers: Infinity, maxWatchers: -Infinity,
+    minUpdatedSinceDays: Infinity, maxUpdatedSinceDays: -Infinity,
+    minCreatedSinceDays: Infinity, maxCreatedSinceDays: -Infinity,
+    minPushedSinceDays: Infinity, maxPushedSinceDays: -Infinity,
+  };
+}
+
+// New function to read URLs from a file
+async function readUrlsFromFile(filePath: string): Promise<string[]> {
+  try {
+    const content = await fs.readFile(filePath, 'utf-8');
+    return content.split('\n').filter(url => url.trim() !== '');
+  } catch (error: any) {
+    console.error(`Error reading file ${filePath}: ${error.message}`);
+    return [];
+  }
+}
+
+// Updated main function
 async function main() {
   try {
-    const url = 'https://raw.githubusercontent.com/e2b-dev/awesome-ai-agents/main/README.md';
-    console.log(`Fetching content from ${url}...`);
-
-    // Fetch the content of the page
-    const response = await axios.get(url);
-    const contentType = response.headers['content-type'];
-    const content: string = response.data as string;
-
-    console.log(`Content type: ${contentType}`);
-    console.log('Extracting GitHub repository links...');
-
-    // Regular expression to find GitHub repository URLs
-    const githubRepoUrls = new Set<string>();
-    const repoUrlRegex = /https:\/\/github\.com\/[a-zA-Z0-9_-]+\/[a-zA-Z0-9_.-]+/g;
-
-    // Extract all matching GitHub repo URLs
-    const matches = content.match(repoUrlRegex);
-    if (matches) {
-      matches.forEach((url) => githubRepoUrls.add(url));
+    const urlFilePath = process.argv[2];
+    if (!urlFilePath) {
+      console.error('Please provide a path to the URL file as a command-line argument.');
+      return;
     }
 
-    console.log(`Found ${githubRepoUrls.size} GitHub repositories.`);
+    console.log(`Reading URLs from ${urlFilePath}...`);
+    const urls = await readUrlsFromFile(urlFilePath);
+    console.log(`Found ${urls.length} URLs in the file.`);
+
+    const githubRepoUrls = new Set<string>();
+    for (const url of urls) {
+      console.log(`Fetching content from ${url}...`);
+      const response = await axios.get(url);
+      const content: string = response.data as string;
+      const extractedUrls = extractGitHubRepoUrls(content);
+      extractedUrls.forEach(repoUrl => githubRepoUrls.add(repoUrl));
+    }
+
+    console.log(`Found ${githubRepoUrls.size} unique GitHub repositories.`);
 
     const repos: Repo[] = [];
     let apiCallCount = 0;
     const maxApiCalls = 10;
     
-    let minStars = Infinity, maxStars = -Infinity;
-    let minForks = Infinity, maxForks = -Infinity;
-    let minWatchers = Infinity, maxWatchers = -Infinity;
-    let minUpdatedSinceDays = Infinity, maxUpdatedSinceDays = -Infinity;
-    let minCreatedSinceDays = Infinity, maxCreatedSinceDays = -Infinity;
-    let minPushedSinceDays = Infinity, maxPushedSinceDays = -Infinity;
+    const minMax = initializeMinMax();
 
     // Get your GitHub token from environment variables
     const githubToken = process.env.GITHUB_TOKEN;
@@ -77,7 +177,7 @@ async function main() {
       return;
     }
 
-    // Loop through each repository URL to fetch it's data
+    // Loop through each repository URL to fetch its data
     for (const repoUrl of githubRepoUrls) {
       if (apiCallCount >= maxApiCalls) {
         console.log(`Reached maximum API call limit (${maxApiCalls}). Stopping.`);
@@ -85,62 +185,13 @@ async function main() {
       }
 
       console.log(`Fetching data for ${repoUrl}...`);
-
-      // Extract the user and repository name from the URL
-      const repoPath = repoUrl.replace('https://github.com/', '');
-
-      try {
-        // Fetch repository data from GitHub API
-        const apiUrl = `https://api.github.com/repos/${repoPath}`;
-        const repoResponse = await axios.get(apiUrl, {
-          headers: {
-            'User-Agent': 'request',
-            'Authorization': `token ${githubToken}`,
-          },
-        });
+      const repo = await fetchRepoData(repoUrl, githubToken);
+      
+      if (repo) {
         apiCallCount++;
-        
-        const repoData = repoResponse.data as any;
-        const repo: Repo = {
-          url: repoUrl,
-          star_count: repoData.stargazers_count,
-          name: repoData.name,
-          description: repoData.description || '',
-          fork_count: repoData.forks_count,
-          watchers_count: repoData.watchers_count,
-          created_at: repoData.created_at,
-          updated_at: repoData.updated_at,
-          pushed_at: repoData.pushed_at,
-          topics: repoData.topics || [],
-          aggregate_score: 0,
-        };
-        repo.aggregate_score = calculateAggregateScore(repo);
-
-        // Update min and max values for all filters
-        minStars = Math.min(minStars, repo.star_count);
-        maxStars = Math.max(maxStars, repo.star_count);
-        minForks = Math.min(minForks, repo.fork_count);
-        maxForks = Math.max(maxForks, repo.fork_count);
-        minWatchers = Math.min(minWatchers, repo.watchers_count);
-        maxWatchers = Math.max(maxWatchers, repo.watchers_count);
-
-        const updatedSinceDays = (new Date().getTime() - new Date(repo.updated_at).getTime()) / (1000 * 60 * 60 * 24);
-        minUpdatedSinceDays = Math.min(minUpdatedSinceDays, updatedSinceDays);
-        maxUpdatedSinceDays = Math.max(maxUpdatedSinceDays, updatedSinceDays);
-
-        const createdSinceDays = (new Date().getTime() - new Date(repo.created_at).getTime()) / (1000 * 60 * 60 * 24);
-        minCreatedSinceDays = Math.min(minCreatedSinceDays, createdSinceDays);
-        maxCreatedSinceDays = Math.max(maxCreatedSinceDays, createdSinceDays);
-
-        const pushedSinceDays = (new Date().getTime() - new Date(repo.pushed_at).getTime()) / (1000 * 60 * 60 * 24);
-        minPushedSinceDays = Math.min(minPushedSinceDays, pushedSinceDays);
-        maxPushedSinceDays = Math.max(maxPushedSinceDays, pushedSinceDays);
-
+        updateMinMaxValues(repo, minMax);
         console.log(`Repository ${repoUrl} has ${repo.star_count} stars. (API call ${apiCallCount}/${maxApiCalls})`);
         repos.push(repo);
-      } catch (error: any) {
-        console.error(`Failed to fetch data for ${repoUrl}: ${error.message}`);
-        apiCallCount++; // Count failed requests towards the limit
       }
     }
 
@@ -160,8 +211,6 @@ async function main() {
 
 // Run the main function
 main();
-
-
 
 /* Example response
 [
