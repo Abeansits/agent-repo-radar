@@ -3,3 +3,4 @@ https://raw.githubusercontent.com/kyrolabs/awesome-agents/main/README.md
 https://raw.githubusercontent.com/SamurAIGPT/Best-AI-Agents/main/README.md
 https://raw.githubusercontent.com/slavakurilyak/awesome-ai-agents/main/README.md
 https://raw.githubusercontent.com/Jenqyang/Awesome-AI-Agents/main/README.md
+https://raw.githubusercontent.com/kaushikb11/awesome-llm-agents/refs/heads/main/README.md

@@ -139,7 +139,32 @@ async function readUrlsFromFile(filePath: string): Promise<string[]> {
   }
 }
 
-// Updated main function
+// New function to generate markdown table
+function generateMarkdownTable(repos: Repo[]): string {
+  // Create markdown table header
+  let markdownTable = "| Repository | Stars | Forks | Watchers | Created | Last Updated | Topics | Aggregate Score |\n";
+  markdownTable += "|------------|-------|-------|----------|---------|--------------|--------|------------------|\n";
+
+  // Add each repository to the markdown table
+  repos.forEach((repo) => {
+    const createdDate = new Date(repo.created_at).toISOString().split('T')[0];
+    const updatedDate = new Date(repo.updated_at).toISOString().split('T')[0];
+    const topicsString = repo.topics.slice(0, 3).join(', '); // Limit to first 3 topics
+
+    markdownTable += `| [${repo.name}](${repo.url}) | ${repo.star_count} | ${repo.fork_count} | ${repo.watchers_count} | ${createdDate} | ${updatedDate} | ${topicsString} | ${repo.aggregate_score.toFixed(2)} |\n`;
+  });
+
+  return markdownTable;
+}
+
+// Main function
+// 1. Read URLs from a file
+// 2. Extract GitHub repository URLs from content
+// 3. Fetch repository data from GitHub API
+// 4. Transform repository data into a Repo interface
+// 5. Update min and max values based on repository data
+// 6. Sort repositories by aggregate score in descending order
+// 7. Log the repositories sorted by aggregate score
 async function main() {
   try {
     const urlFilePath = process.argv[2];
@@ -165,7 +190,7 @@ async function main() {
 
     const repos: Repo[] = [];
     let apiCallCount = 0;
-    const maxApiCalls = 10;
+    const maxApiCalls = 5;
     
     const minMax = initializeMinMax();
 
@@ -198,6 +223,10 @@ async function main() {
     // Sort repositories by aggregate score in descending order
     repos.sort((a, b) => b.aggregate_score - a.aggregate_score);
 
+    // Generate and log the markdown table
+    const markdownTable = generateMarkdownTable(repos);
+    console.log(markdownTable);
+
     console.log('\nRepositories sorted by aggregate score:');
     repos.forEach((repo) => {
       console.log(`${repo.url} - Aggregate Score: ${repo.aggregate_score.toFixed(2)}, ⭐ ${repo.star_count} stars`);
@@ -212,7 +241,7 @@ async function main() {
 // Run the main function
 main();
 
-/* Example response
+/* Example response from GH API
 [
   {
     "id": 1296269,
