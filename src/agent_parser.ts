@@ -5,18 +5,38 @@ import {
   extractGitHubRepoUrls, 
   initializeMinMax, 
   readUrlsFromFile, 
-  generateMarkdownTable 
+  generateMarkdownTable,
+  generateHtmlTable
 } from './utils/helpers';
+import * as fs from 'fs/promises';
 
 async function main() {
   try {
     const urlFilePath = process.argv[2];
+    const outputFormat = process.argv[3]?.toLowerCase() || 'markdown';
+    const maxApiCalls = parseInt(process.argv[4]) || 5;
+
     if (!urlFilePath) {
-      console.error('Please provide a path to the URL file as a command-line argument.');
+      console.error('Please provide the required parameters:');
+      console.error('Usage: ts-node src/agent_parser.ts <url-file-path> [output-format] [max-api-calls]');
+      console.error('  - url-file-path: Path to the file containing URLs');
+      console.error('  - output-format: "markdown" or "html" (default: markdown)');
+      console.error('  - max-api-calls: Maximum number of GitHub API calls (default: 5)');
+      return;
+    }
+
+    if (outputFormat !== 'markdown' && outputFormat !== 'html') {
+      console.error('Invalid output format. Please use either "markdown" or "html".');
+      return;
+    }
+
+    if (maxApiCalls <= 0) {
+      console.error('max-api-calls must be a positive number.');
       return;
     }
 
     console.log(`Reading URLs from ${urlFilePath}...`);
+    console.log(`Maximum API calls set to: ${maxApiCalls}`);
     const urls = await readUrlsFromFile(urlFilePath);
     console.log(`Found ${urls.length} URLs in the file.`);
 
@@ -33,7 +53,6 @@ async function main() {
 
     const repos: Repo[] = [];
     let apiCallCount = 0;
-    const maxApiCalls = 5;
     
     const minMax = initializeMinMax();
 
@@ -51,10 +70,10 @@ async function main() {
       }
 
       console.log(`Fetching data for ${repoUrl}...`);
+      apiCallCount++;
       const repo = await fetchRepoData(repoUrl, githubToken);
       
       if (repo) {
-        apiCallCount++;
         console.log(`Repository ${repoUrl} has ${repo.star_count} stars. (API call ${apiCallCount}/${maxApiCalls})`);
         repos.push(repo);
       }
@@ -62,8 +81,17 @@ async function main() {
 
     repos.sort((a, b) => b.aggregate_score - a.aggregate_score);
 
-    const markdownTable = generateMarkdownTable(repos);
-    console.log(markdownTable);
+    if (outputFormat === 'markdown') {
+      // Generate and log markdown table
+      const markdownTable = generateMarkdownTable(repos);
+      console.log(markdownTable);
+    } else {
+      // Generate and save HTML output
+      const htmlContent = generateHtmlTable(repos);
+      const outputFile = 'repository-analysis.html';
+      await fs.writeFile(outputFile, htmlContent);
+      console.log(`\nHTML report has been generated as ${outputFile}`);
+    }
 
     console.log('\nRepositories sorted by aggregate score:');
     repos.forEach((repo) => {
