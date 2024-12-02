@@ -12,7 +12,7 @@ With the rapid pace of AI development, it's becoming increasingly challenging to
 2. Extracts GitHub repository URLs from these lists
 3. Fetches detailed information about each repository using the GitHub API
 4. Calculates an aggregate score for each repository
-5. Generates a sorted markdown table with key metrics
+5. Generates a sorted output in either markdown or HTML format
 
 ## Scoring Algorithm
 
@@ -44,12 +44,30 @@ echo "https://raw.githubusercontent.com/user/repo/main/awesome-list.md" > source
 3. Run the analyzer:
 
 ```bash
-npm start sources.txt
+# Basic usage (defaults to markdown output and 5 API calls)
+ts-node src/agent_parser.ts sources.txt
+
+# Specify output format (markdown or html)
+ts-node src/agent_parser.ts sources.txt html
+
+# Specify output format and max API calls
+ts-node src/agent_parser.ts sources.txt markdown 10
+ts-node src/agent_parser.ts sources.txt html 15
 ```
+
+### Parameters
+
+- `<url-file-path>`: Path to the file containing URLs (required)
+- `[output-format]`: Output format, either "markdown" or "html" (default: markdown)
+- `[max-api-calls]`: Maximum number of GitHub API calls to make (default: 5)
 
 ## Output
 
-The tool generates a markdown table with the following information for each repository:
+The tool generates either:
+- A markdown table in the console output, or
+- An HTML file (`repository-analysis.html`) with a styled table
+
+Both formats include:
 - Repository name and link
 - Star count
 - Fork count
@@ -62,8 +80,9 @@ The tool generates a markdown table with the following information for each repo
 ## Requirements
 
 - Node.js
-- GitHub API token
 - TypeScript
+- GitHub API token with `public_repo` access
+- `axios` for HTTP requests
 
 ## Contributing
 

@@ -10,34 +10,68 @@ import {
 } from './utils/helpers';
 import * as fs from 'fs/promises';
 
+interface CliArgs {
+  urlFile: string;
+  format: 'markdown' | 'html';
+  maxCalls: number;
+}
+
+function parseArgs(): CliArgs {
+  const args = process.argv.slice(2);
+  const parsedArgs: CliArgs = {
+    urlFile: '',
+    format: 'markdown',
+    maxCalls: 5
+  };
+
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    switch (arg) {
+      case '--url-file':
+      case '-f':
+        parsedArgs.urlFile = args[++i];
+        break;
+      case '--format':
+      case '-o':
+        const format = args[++i]?.toLowerCase();
+        if (format !== 'markdown' && format !== 'html') {
+          throw new Error('Invalid output format. Please use either "markdown" or "html".');
+        }
+        parsedArgs.format = format;
+        break;
+      case '--max-calls':
+      case '-m':
+        const maxCalls = parseInt(args[++i]);
+        if (isNaN(maxCalls) || maxCalls <= 0) {
+          throw new Error('max-calls must be a positive number.');
+        }
+        parsedArgs.maxCalls = maxCalls;
+        break;
+      default:
+        throw new Error(`Unknown argument: ${arg}`);
+    }
+  }
+
+  if (!parsedArgs.urlFile) {
+    throw new Error(
+      'Please provide the required parameters:\n' +
+      'Usage: ts-node src/agent_parser.ts --url-file <path> [--format markdown|html] [--max-calls <number>]\n' +
+      '  --url-file, -f    : Path to the file containing URLs\n' +
+      '  --format, -o      : Output format "markdown" or "html" (default: markdown)\n' +
+      '  --max-calls, -m   : Maximum number of GitHub API calls (default: 5)'
+    );
+  }
+
+  return parsedArgs;
+}
+
 async function main() {
   try {
-    const urlFilePath = process.argv[2];
-    const outputFormat = process.argv[3]?.toLowerCase() || 'markdown';
-    const maxApiCalls = parseInt(process.argv[4]) || 5;
-
-    if (!urlFilePath) {
-      console.error('Please provide the required parameters:');
-      console.error('Usage: ts-node src/agent_parser.ts <url-file-path> [output-format] [max-api-calls]');
-      console.error('  - url-file-path: Path to the file containing URLs');
-      console.error('  - output-format: "markdown" or "html" (default: markdown)');
-      console.error('  - max-api-calls: Maximum number of GitHub API calls (default: 5)');
-      return;
-    }
-
-    if (outputFormat !== 'markdown' && outputFormat !== 'html') {
-      console.error('Invalid output format. Please use either "markdown" or "html".');
-      return;
-    }
-
-    if (maxApiCalls <= 0) {
-      console.error('max-api-calls must be a positive number.');
-      return;
-    }
-
-    console.log(`Reading URLs from ${urlFilePath}...`);
-    console.log(`Maximum API calls set to: ${maxApiCalls}`);
-    const urls = await readUrlsFromFile(urlFilePath);
+    const args = parseArgs();
+    
+    console.log(`Reading URLs from ${args.urlFile}...`);
+    console.log(`Maximum API calls set to: ${args.maxCalls}`);
+    const urls = await readUrlsFromFile(args.urlFile);
     console.log(`Found ${urls.length} URLs in the file.`);
 
     const githubRepoUrls = new Set<string>();
@@ -64,8 +98,8 @@ async function main() {
     }
 
     for (const repoUrl of githubRepoUrls) {
-      if (apiCallCount >= maxApiCalls) {
-        console.log(`Reached maximum API call limit (${maxApiCalls}). Stopping.`);
+      if (apiCallCount >= args.maxCalls) {
+        console.log(`Reached maximum API call limit (${args.maxCalls}). Stopping.`);
         break;
       }
 
@@ -74,14 +108,14 @@ async function main() {
       const repo = await fetchRepoData(repoUrl, githubToken);
       
       if (repo) {
-        console.log(`Repository ${repoUrl} has ${repo.star_count} stars. (API call ${apiCallCount}/${maxApiCalls})`);
+        console.log(`Repository ${repoUrl} has ${repo.star_count} stars. (API call ${apiCallCount}/${args.maxCalls})`);
         repos.push(repo);
       }
     }
 
     repos.sort((a, b) => b.aggregate_score - a.aggregate_score);
 
-    if (outputFormat === 'markdown') {
+    if (args.format === 'markdown') {
       // Generate and log markdown table
       const markdownTable = generateMarkdownTable(repos);
       console.log(markdownTable);
