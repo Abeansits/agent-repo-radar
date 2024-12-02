@@ -54,87 +54,80 @@ export function generateHtmlTable(repos: Repo[]): string {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitHub Repository Analysis</title>
+    <meta name="description" content="AI Agent Repo Radar - Discover and analyze AI agent repositories on GitHub">
+    <meta name="keywords" content="AI agents, GitHub repositories, repository analysis, AI tools">
+    <meta property="og:title" content="AI Agent Repo Radar">
+    <meta property="og:description" content="Discover and analyze AI agent repositories on GitHub">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>">
+    <title>AI Agent Repo Radar</title>
     <style>
+        /* Existing styles... */
+
+        /* Adding radar-like color scheme */
+        :root {
+            --radar-green: #00ff88;
+            --radar-dark: #1a1a1a;
+            --radar-grid: #2d2d2d;
+            --radar-pulse: #00ff8833;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background-color: #1a1a1a;
+            background-color: var(--radar-dark);
             color: #e6e6e6;
-            padding: 2rem;
-            line-height: 1.6;
         }
 
         h1 {
-            color: #ff6b3d;
+            color: var(--radar-green);
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #888;
             margin-bottom: 2rem;
-            font-weight: 600;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background-color: #242424;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            font-size: 1.1rem;
         }
 
         th {
-            background-color: #2d2d2d;
-            color: #ff6b3d;
-            font-weight: 600;
-            text-align: left;
-            padding: 1rem;
-            border-bottom: 2px solid #393939;
-        }
-
-        td {
-            padding: 1rem;
-            border-bottom: 1px solid #393939;
-        }
-
-        tr:hover {
-            background-color: #2a2a2a;
-        }
-
-        a {
-            color: #ff8f66;
-            text-decoration: none;
-            transition: color 0.2s ease;
-        }
-
-        a:hover {
-            color: #ff6b3d;
-        }
-
-        .topics {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-
-        .topic {
-            background-color: rgba(255, 107, 61, 0.1);
-            color: #ff8f66;
-            padding: 0.2rem 0.6rem;
-            border-radius: 12px;
-            font-size: 0.85rem;
+            background-color: var(--radar-grid);
+            color: var(--radar-green);
         }
 
         .score {
-            font-weight: 600;
-            color: #ff6b3d;
+            color: var(--radar-green);
+        }
+
+        .topic {
+            background-color: rgba(0, 255, 136, 0.1);
+            color: var(--radar-green);
+        }
+
+        /* Pulse animation for the radar effect */
+        @keyframes radar-pulse {
+            0% { box-shadow: 0 0 0 0 var(--radar-pulse); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 0, 0, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 0, 0, 0); }
+        }
+
+        .container {
+            position: relative;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--radar-green);
+            animation: radar-pulse 2s infinite;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>GitHub Repository Analysis</h1>
+        <h1>AI Agent Repo Radar</h1>
+        <div class="subtitle">Scanning the AI Agent Landscape</div>
         <table>
             <thead>
                 <tr>
