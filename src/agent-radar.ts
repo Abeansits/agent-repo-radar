@@ -5,9 +5,9 @@ import {
   extractGitHubRepoUrls, 
   initializeMinMax, 
   readUrlsFromFile, 
-  generateMarkdownTable,
-  generateHtmlTable
+  generateMarkdownTable 
 } from './utils/helpers';
+import { generateHtmlTable } from './utils/html-generator';
 import * as fs from 'fs/promises';
 
 interface CliArgs {

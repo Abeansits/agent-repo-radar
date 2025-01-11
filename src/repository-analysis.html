@@ -78,7 +78,7 @@
     }
 
     .theme-switch {
-      position: fixed;
+      position: absolute;
       top: 1rem;
       right: 1rem;
       width: 40px;
@@ -111,6 +111,7 @@
       margin: 0 auto;
       position: relative;
       padding: 2rem;
+      padding-top: 4rem;
       background: var(--bg-secondary);
       border-radius: 12px;
       border: 1px solid var(--border);
@@ -154,6 +155,8 @@
       font-size: 0.875rem;
       text-transform: uppercase;
       letter-spacing: 0.05em;
+      white-space: nowrap;
+      padding: 1rem 0.75rem;
     }
 
     tr {
@@ -166,6 +169,7 @@
     }
 
     td {
+      padding: 1rem 0.75rem;
       font-size: 0.9375rem;
     }
 
@@ -220,6 +224,137 @@
       th, td { padding: 0.75rem; }
       .topics { max-width: 150px; }
     }
+
+    .description {
+      margin: 2rem 0;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      max-width: 800px;
+    }
+
+    .info-section {
+      margin: 1.5rem 0;
+    }
+
+    .info-button {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--primary-soft);
+      color: var(--primary);
+      border: 1px solid var(--border);
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: var(--font-mono);
+      transition: all 0.2s ease;
+    }
+
+    .info-button:hover {
+      background: var(--hover);
+    }
+
+    .info-icon {
+      width: 16px;
+      height: 16px;
+    }
+
+    .scoring-info {
+      margin-top: 1rem;
+      padding: 1.5rem;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      transition: all 0.3s ease-in-out;
+    }
+
+    .scoring-info.visible {
+      max-height: 500px;
+      opacity: 1;
+      padding: 1.5rem;
+    }
+
+    .scoring-info h3 {
+      margin-bottom: 1rem;
+      color: var(--primary);
+    }
+
+    .scoring-info ul {
+      margin: 1rem 0;
+      padding-left: 1.5rem;
+    }
+
+    .scoring-info li {
+      margin: 0.5rem 0;
+      color: var(--text-secondary);
+    }
+
+    .links-section {
+      margin-top: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .github-link {
+      color: var(--primary);
+      text-decoration: none;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+    }
+
+    .github-link:hover {
+      text-decoration: underline;
+    }
+
+    .footer {
+      margin-top: 2rem;
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+      .links-section {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+
+    #bmc-wbtn {
+      transform: scale(0.6) !important;
+      transform-origin: right center;
+    }
+
+    .sort-arrow {
+      opacity: 0.5;
+      font-size: 1em;
+      margin-left: 0.5rem;
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    th[data-sort] {
+      cursor: pointer;
+    }
+
+    th[data-sort]:hover .sort-arrow {
+      opacity: 1;
+    }
+
+    th[data-sort].asc .sort-arrow {
+      opacity: 1;
+      content: "↑";
+    }
+
+    th[data-sort].desc .sort-arrow {
+      opacity: 1;
+      content: "↓";
+    }
   </style>
 </head>
 <body>
@@ -229,17 +364,61 @@
     <div class="container">
         <h1>AI Agent Repo Radar</h1>
         <div class="subtitle">Scanning the AI Agent Landscape</div>
+        
+        <div class="description">
+            <p>AI Agent Repo Radar helps you discover the most impactful AI agent repositories on GitHub. Our scoring algorithm analyzes community engagement, maintenance patterns, and topic relevance to surface the projects that matter most.</p>
+        </div>
+
+        <div class="info-section">
+            <button class="info-button" onclick="toggleScoring()">
+                <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="16" x2="12" y2="12"/>
+                    <line x1="12" y1="8" x2="12" y2="8"/>
+                </svg>
+                How are repositories scored?
+            </button>
+            <div id="scoring-info" class="scoring-info hidden">
+                <h3>Repository Scoring Criteria</h3>
+                <p>Our algorithm weighs multiple factors to determine a repository's value:</p>
+                <ul>
+                    <li>Stars (25%): Community interest and approval</li>
+                    <li>Forks (20%): Developer engagement and usage</li>
+                    <li>Watchers (15%): Active following</li>
+                    <li>Recent Activity (15%): Maintenance and updates</li>
+                    <li>Topic Coverage (15%): Relevance to AI agents</li>
+                    <li>Repository Age (10%): Project maturity</li>
+                </ul>
+                <div class="links-section">
+                    <a href="https://github.com/Abeansits/agent-repo-radar" target="_blank" class="github-link">
+                        View source on GitHub →
+                    </a>
+                    <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" 
+                      data-name="bmc-button" 
+                      data-slug="abeansits" 
+                      data-color="#60a5fa" 
+                      data-emoji=""  
+                      data-font="Inter" 
+                      data-text="Buy me a coffee" 
+                      data-outline-color="#334155" 
+                      data-font-color="#ffffff" 
+                      data-coffee-color="#0f172a" >
+                    </script>
+                </div>
+            </div>
+        </div>
+
         <table>
             <thead>
                 <tr>
-                    <th style="width: 30%">Repository</th>
-                    <th>Stars</th>
-                    <th>Forks</th>
-                    <th>Watchers</th>
-                    <th>Created</th>
-                    <th>Last Update</th>
-                    <th>Topics</th>
-                    <th>Score</th>
+                    <th style="width: 20%" data-sort="name">Repository <span class="sort-arrow">↕</span></th>
+                    <th style="width: 10%" data-sort="stars">Stars <span class="sort-arrow">↕</span></th>
+                    <th style="width: 10%" data-sort="forks">Forks <span class="sort-arrow">↕</span></th>
+                    <th style="width: 10%" data-sort="watchers">Watchers <span class="sort-arrow">↕</span></th>
+                    <th style="width: 11%" data-sort="created">Created <span class="sort-arrow">↕</span></th>
+                    <th style="width: 11%" data-sort="updated">Last Update <span class="sort-arrow">↕</span></th>
+                    <th style="width: 16%">Topics</th>
+                    <th style="width: 12%" data-sort="score">Score <span class="sort-arrow">↕</span></th>
                 </tr>
             </thead>
             <tbody>
@@ -276,8 +455,13 @@
   
             </tbody>
         </table>
+        
+        <div class="footer">
+            <p>Last updated: 1/10/2025</p>
+        </div>
     </div>
     <script>
+      
     function toggleTheme() {
       const html = document.documentElement;
       const currentTheme = html.getAttribute('data-theme');
@@ -299,6 +483,56 @@
     const savedTheme = localStorage.getItem('theme') || 'dark';
     document.documentElement.setAttribute('data-theme', savedTheme);
     updateThemeIcon(savedTheme);
-  </script>
+  
+      
+    function toggleScoring() {
+      const info = document.getElementById('scoring-info');
+      info.classList.toggle('visible');
+    }
+  
+      
+    document.querySelectorAll('th[data-sort]').forEach(th => {
+      th.addEventListener('click', () => {
+        const table = th.closest('table');
+        const tbody = table.querySelector('tbody');
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        const sortKey = th.dataset.sort;
+        const isAsc = !th.classList.contains('asc');
+        
+        // Reset all headers
+        table.querySelectorAll('th').forEach(header => {
+          header.classList.remove('asc', 'desc');
+        });
+        
+        // Set current header
+        th.classList.add(isAsc ? 'asc' : 'desc');
+        
+        // Sort rows
+        rows.sort((a, b) => {
+          let aVal = a.querySelector(`td:nth-child(${th.cellIndex + 1})`).innerText;
+          let bVal = b.querySelector(`td:nth-child(${th.cellIndex + 1})`).innerText;
+          
+          // Handle numeric values
+          if (sortKey === 'stars' || sortKey === 'forks' || sortKey === 'watchers' || sortKey === 'score') {
+            aVal = parseFloat(aVal.replace(/,/g, ''));
+            bVal = parseFloat(bVal.replace(/,/g, ''));
+          }
+          // Handle dates
+          else if (sortKey === 'created' || sortKey === 'updated') {
+            aVal = new Date(aVal);
+            bVal = new Date(bVal);
+          }
+          
+          if (aVal < bVal) return isAsc ? -1 : 1;
+          if (aVal > bVal) return isAsc ? 1 : -1;
+          return 0;
+        });
+        
+        // Reorder rows
+        rows.forEach(row => tbody.appendChild(row));
+      });
+    });
+  
+    </script>
 </body>
 </html>
