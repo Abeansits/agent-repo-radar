@@ -1,5 +1,9 @@
 # Agent Repository Radar
 
+<div align="center">
+![Agent Repo Radar Logo](public/images/logo.png)
+</div>
+
 A tool that aggregates and analyzes GitHub repositories from multiple sources including "awesome" lists, helping you discover and evaluate AI-agent-related projects based on quantitative metrics.
 
 ## Background
