@@ -134,7 +134,7 @@ async function main() {
     } else {
       // Generate and save HTML output
       const htmlContent = generateHtmlTable(repos);
-      const outputFile = 'repository-analysis.html';
+      const outputFile = '../repository-analysis.html';
       await fs.writeFile(outputFile, htmlContent);
       console.log(`\nHTML report has been generated as ${outputFile}`);
     }

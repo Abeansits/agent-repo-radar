@@ -48,6 +48,16 @@ function generateTableRows(repos: Repo[]): string {
         --font-sans: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
         --font-mono: 'IBM Plex Mono', monospace;
       }
+
+    .logo-container {
+        text-align: center;
+        margin: 2rem 0;
+    }
+
+    .logo-container img {
+      max-width: 200px;
+      height: auto;
+    }
   
       /* Default to light theme */
       :root[data-theme="light"] {
@@ -279,6 +289,9 @@ function generateTableRows(repos: Repo[]): string {
           <svg id="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
       </button>
       <div class="container">
+        <div class="logo-container">
+            <img src="./public/images/logo.png" alt="Agent Repo Radar Logo" width="200">
+        </div>
           <h1>AI Agent Repo Radar</h1>
           <div class="subtitle">Scanning the AI Agent Landscape</div>
           <table>
