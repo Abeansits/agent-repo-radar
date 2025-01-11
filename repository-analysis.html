@@ -230,6 +230,23 @@
         th, td { padding: 0.75rem; }
         .topics { max-width: 150px; }
       }
+  
+      .repo-description {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        line-height: 1.4;
+        max-width: 400px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+      }
+  
+      td:first-child {
+        padding-right: 2rem;
+      }
     </style>
   </head>
   <body>
@@ -258,7 +275,10 @@
               <tbody>
                   
       <tr>
-        <td><a href="https://github.com/e2b-dev/e2b" target="_blank" class="repo-link">E2B</a></td>
+        <td>
+          <a href="https://github.com/e2b-dev/e2b" target="_blank" class="repo-link">E2B</a>
+          <div class="repo-description">Secure open source cloud runtime for AI apps & AI agents</div>
+        </td>
         <td>7,285</td>
         <td>485</td>
         <td>7,285</td>
@@ -273,7 +293,10 @@
       </tr>
     
       <tr>
-        <td><a href="https://github.com/e2b-dev/awesome-sdks-for-ai-agents" target="_blank" class="repo-link">awesome-ai-sdks</a></td>
+        <td>
+          <a href="https://github.com/e2b-dev/awesome-sdks-for-ai-agents" target="_blank" class="repo-link">awesome-ai-sdks</a>
+          <div class="repo-description">A database of SDKs, frameworks, libraries, and tools for creating, monitoring, debugging and deploying autonomous AI agents</div>
+        </td>
         <td>822</td>
         <td>71</td>
         <td>822</td>

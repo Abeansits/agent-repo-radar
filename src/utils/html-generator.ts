@@ -3,7 +3,10 @@ import { Repo } from '../types/repo';
 function generateTableRows(repos: Repo[]): string {
     return repos.map(repo => `
       <tr>
-        <td><a href="${repo.url}" target="_blank" class="repo-link">${repo.name}</a></td>
+        <td>
+          <a href="${repo.url}" target="_blank" class="repo-link">${repo.name}</a>
+          ${repo.description ? `<div class="repo-description">${repo.description}</div>` : ''}
+        </td>
         <td>${repo.star_count.toLocaleString()}</td>
         <td>${repo.fork_count.toLocaleString()}</td>
         <td>${repo.watchers_count.toLocaleString()}</td>
@@ -238,6 +241,23 @@ function generateTableRows(repos: Repo[]): string {
         .container { padding: 1rem; }
         th, td { padding: 0.75rem; }
         .topics { max-width: 150px; }
+      }
+  
+      .repo-description {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        line-height: 1.4;
+        max-width: 400px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+      }
+  
+      td:first-child {
+        padding-right: 2rem;
       }
     `;
   }
