@@ -1,353 +1,304 @@
 
-  <!DOCTYPE html>
-  <html lang="en">
-  <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <meta name="description" content="AI Agent Repo Radar - Discover and analyze AI agent repositories on GitHub">
-      <meta name="keywords" content="AI agents, GitHub repositories, repository analysis, AI tools">
-      <meta property="og:title" content="AI Agent Repo Radar">
-      <meta property="og:description" content="Discover and analyze AI agent repositories on GitHub">
-      <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>">
-      <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-      <title>AI Agent Repo Radar</title>
-      <style>
-          :root {
-              --radar-green: #00ff88;
-              --radar-dark: #1a1a1a;
-              --radar-grid: #2d2d2d;
-              --radar-pulse: #00ff8833;
-              --font-sans: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
-              --font-mono: 'IBM Plex Mono', monospace;
-          }
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AI Agent Repo Radar - Discover and analyze AI agent repositories on GitHub">
+    <meta name="keywords" content="AI agents, GitHub repositories, repository analysis, AI tools">
+    <meta property="og:title" content="AI Agent Repo Radar">
+    <meta property="og:description" content="Discover and analyze AI agent repositories on GitHub">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <title>AI Agent Repo Radar</title>
+    <style>
+    :root {
+      /* Light theme */
+      --light-bg: #ffffff;
+      --light-bg-secondary: #f5f7fa;
+      --light-border: #e2e8f0;
+      --light-text: #1a202c;
+      --light-text-secondary: #4a5568;
+      --light-primary: #2563eb;
+      --light-primary-soft: #dbeafe;
+      --light-hover: #f1f5f9;
+      --light-table-header: #f8fafc;
+
+      /* Dark theme */
+      --dark-bg: #0f172a;
+      --dark-bg-secondary: #1e293b;
+      --dark-border: #334155;
+      --dark-text: #e2e8f0;
+      --dark-text-secondary: #94a3b8;
+      --dark-primary: #60a5fa;
+      --dark-primary-soft: rgba(96, 165, 250, 0.1);
+      --dark-hover: #2a3a53;
+      --dark-table-header: #1e293b;
+
+      /* Theme-independent properties */
+      --font-sans: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+      --font-mono: 'IBM Plex Mono', monospace;
+    }
+
+    /* Default to light theme */
+    :root[data-theme="light"] {
+      --bg: var(--light-bg);
+      --bg-secondary: var(--light-bg-secondary);
+      --border: var(--light-border);
+      --text: var(--light-text);
+      --text-secondary: var(--light-text-secondary);
+      --primary: var(--light-primary);
+      --primary-soft: var(--light-primary-soft);
+      --hover: var(--light-hover);
+      --table-header: var(--light-table-header);
+    }
+
+    /* Dark theme */
+    :root[data-theme="dark"] {
+      --bg: var(--dark-bg);
+      --bg-secondary: var(--dark-bg-secondary);
+      --border: var(--dark-border);
+      --text: var(--dark-text);
+      --text-secondary: var(--dark-text-secondary);
+      --primary: var(--dark-primary);
+      --primary-soft: var(--dark-primary-soft);
+      --hover: var(--dark-hover);
+      --table-header: var(--dark-table-header);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      line-height: 1.5;
+      padding: 2rem;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .theme-switch {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      width: 40px;
+      height: 40px;
+      padding: 0.5rem;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .theme-switch:hover {
+      background: var(--hover);
+      transform: scale(1.05);
+    }
+
+    .theme-switch svg {
+      width: 20px;
+      height: 20px;
+      stroke: var(--text);
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      position: relative;
+      padding: 2rem;
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      transition: all 0.3s ease;
+    }
+
+    h1 {
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      font-size: 2.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      color: var(--text-secondary);
+      margin-bottom: 2rem;
+      font-size: 1.1rem;
+      font-family: var(--font-mono);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin-top: 2rem;
+    }
+
+    th, td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      transition: all 0.3s ease;
+    }
+
+    th {
+      background-color: var(--table-header);
+      color: var(--primary);
+      font-weight: 500;
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    tr {
+      transition: transform 0.2s ease, background-color 0.2s ease;
+    }
+
+    tr:hover {
+      background-color: var(--hover);
+      transform: translateX(4px);
+    }
+
+    td {
+      font-size: 0.9375rem;
+    }
+
+    .repo-link {
+      color: var(--primary);
+      font-size: 1.1rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .repo-link:hover {
+      text-decoration: underline;
+    }
+
+    .score {
+      color: var(--primary);
+      font-family: var(--font-mono);
+      font-weight: 600;
+      font-size: 1.1rem;
+      padding: 0.25rem 0.75rem;
+      background-color: var(--primary-soft);
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      display: inline-block;
+    }
+
+    .topics {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .topic {
+      background-color: var(--primary-soft);
+      color: var(--primary);
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      border: 1px solid var(--border);
+      transition: all 0.3s ease;
+    }
+
+    @media (max-width: 1200px) {
+      .topics { max-width: 200px; }
+      body { padding: 1rem; }
+    }
+
+    @media (max-width: 768px) {
+      .container { padding: 1rem; }
+      th, td { padding: 0.75rem; }
+      .topics { max-width: 150px; }
+    }
+  </style>
+</head>
+<body>
+    <button class="theme-switch" onclick="toggleTheme()" aria-label="Toggle theme">
+        <svg id="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
+    </button>
+    <div class="container">
+        <h1>AI Agent Repo Radar</h1>
+        <div class="subtitle">Scanning the AI Agent Landscape</div>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 30%">Repository</th>
+                    <th>Stars</th>
+                    <th>Forks</th>
+                    <th>Watchers</th>
+                    <th>Created</th>
+                    <th>Last Update</th>
+                    <th>Topics</th>
+                    <th>Score</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+    <tr>
+      <td><a href="https://github.com/e2b-dev/e2b" target="_blank" class="repo-link">E2B</a></td>
+      <td>7,284</td>
+      <td>485</td>
+      <td>7,284</td>
+      <td>3/4/2023</td>
+      <td>1/10/2025</td>
+      <td>
+        <div class="topics">
+          <span class="topic">agent</span><span class="topic">ai</span><span class="topic">ai-agent</span><span class="topic">ai-agents</span><span class="topic">code-interpreter</span><span class="topic">copilot</span><span class="topic">development</span><span class="topic">devtools</span><span class="topic">gpt</span><span class="topic">gpt-4</span><span class="topic">javascript</span><span class="topic">llm</span><span class="topic">nextjs</span><span class="topic">openai</span><span class="topic">python</span><span class="topic">react</span><span class="topic">software</span><span class="topic">typescript</span>
+        </div>
+      </td>
+      <td><div class="score">3044.31</div></td>
+    </tr>
   
-          * {
-              box-sizing: border-box;
-              margin: 0;
-              padding: 0;
-          }
+    <tr>
+      <td><a href="https://github.com/e2b-dev/awesome-sdks-for-ai-agents" target="_blank" class="repo-link">awesome-ai-sdks</a></td>
+      <td>822</td>
+      <td>71</td>
+      <td>822</td>
+      <td>8/5/2023</td>
+      <td>1/10/2025</td>
+      <td>
+        <div class="topics">
+          <span class="topic">agent</span><span class="topic">agentops</span><span class="topic">agents</span><span class="topic">ai</span><span class="topic">ai-agents</span><span class="topic">awesome</span><span class="topic">awesome-list</span><span class="topic">chatgpt</span><span class="topic">e2b</span><span class="topic">framework</span><span class="topic">langchain</span><span class="topic">llama-index</span><span class="topic">llm</span><span class="topic">llmops</span><span class="topic">openai</span><span class="topic">sdk</span><span class="topic">tools</span><span class="topic">vercel</span>
+        </div>
+      </td>
+      <td><div class="score">375.86</div></td>
+    </tr>
   
-          body {
-              background-color: var(--radar-dark);
-              color: #e6e6e6;
-              font-family: var(--font-sans);
-              line-height: 1.5;
-              padding: 2rem;
-          }
-  
-          .container {
-              max-width: 1400px;
-              margin: 0 auto;
-              position: relative;
-              padding: 2rem;
-              background: rgba(45, 45, 45, 0.2);
-              border-radius: 12px;
-              backdrop-filter: blur(10px);
-              border: 1px solid var(--radar-grid);
-          }
-  
-          h1 {
-              color: var(--radar-green);
-              margin-bottom: 0.5rem;
-              font-weight: 600;
-              font-size: 2.5rem;
-              letter-spacing: -0.02em;
-          }
-  
-          .subtitle {
-              color: #888;
-              margin-bottom: 2rem;
-              font-size: 1.1rem;
-              font-family: var(--font-mono);
-          }
-  
-          table {
-              width: 100%;
-              border-collapse: separate;
-              border-spacing: 0;
-              margin-top: 2rem;
-          }
-  
-          th, td {
-              padding: 1rem;
-              text-align: left;
-              border-bottom: 1px solid var(--radar-grid);
-          }
-  
-          th {
-              background-color: var(--radar-grid);
-              color: var(--radar-green);
-              font-weight: 500;
-              font-family: var(--font-mono);
-              font-size: 0.875rem;
-              text-transform: uppercase;
-              letter-spacing: 0.05em;
-          }
-  
-          tr:hover {
-              background-color: rgba(45, 45, 45, 0.5);
-          }
-  
-          td {
-              font-size: 0.9375rem;
-          }
-  
-          a {
-              color: var(--radar-green);
-              text-decoration: none;
-              transition: opacity 0.2s;
-          }
-  
-          a:hover {
-              opacity: 0.8;
-          }
-  
-          .score {
-              color: var(--radar-green);
-              font-family: var(--font-mono);
-              font-weight: 500;
-          }
-  
-          .topics {
-              display: flex;
-              flex-wrap: wrap;
-              gap: 0.5rem;
-          }
-  
-          .topic {
-              background-color: rgba(0, 255, 136, 0.1);
-              color: var(--radar-green);
-              padding: 0.25rem 0.5rem;
-              border-radius: 4px;
-              font-size: 0.75rem;
-              font-family: var(--font-mono);
-              border: 1px solid rgba(0, 255, 136, 0.2);
-          }
-  
-          /* Enhanced radar pulse animation */
-          @keyframes radar-pulse {
-              0% { 
-                  transform: scaleX(0);
-                  opacity: 1;
-              }
-              100% { 
-                  transform: scaleX(1);
-                  opacity: 0;
-              }
-          }
-  
-          .container::before {
-              content: '';
-              position: absolute;
-              top: 0;
-              left: 0;
-              right: 0;
-              height: 2px;
-              background: var(--radar-green);
-              transform-origin: left;
-              animation: radar-pulse 3s ease-in-out infinite;
-          }
-  
-          /* Responsive design */
-          @media (max-width: 1200px) {
-              .topics {
-                  max-width: 200px;
-              }
-              body {
-                  padding: 1rem;
-              }
-          }
-  
-          @media (max-width: 768px) {
-              .container {
-                  padding: 1rem;
-              }
-              th, td {
-                  padding: 0.75rem;
-              }
-              .topics {
-                  max-width: 150px;
-              }
-          }
-      </style>
-  </head>
-  <body>
-      <div class="container">
-          <h1>AI Agent Repo Radar</h1>
-          <div class="subtitle">Scanning the AI Agent Landscape</div>
-          <table>
-              <thead>
-                  <tr>
-                      <th>Repository</th>
-                      <th>Stars</th>
-                      <th>Forks</th>
-                      <th>Watchers</th>
-                      <th>Created</th>
-                      <th>Last Update</th>
-                      <th>Topics</th>
-                      <th>Score</th>
-                  </tr>
-              </thead>
-              <tbody>
-                  
-                      <tr>
-                          <td><a href="https://github.com/e2b-dev/e2b" target="_blank">E2B</a></td>
-                          <td>7,284</td>
-                          <td>485</td>
-                          <td>7,284</td>
-                          <td>3/4/2023</td>
-                          <td>1/10/2025</td>
-                          <td>
-                              <div class="topics">
-                                  
-                                      <span class="topic">agent</span>
-                                  
-                                      <span class="topic">ai</span>
-                                  
-                                      <span class="topic">ai-agent</span>
-                                  
-                                      <span class="topic">ai-agents</span>
-                                  
-                                      <span class="topic">code-interpreter</span>
-                                  
-                                      <span class="topic">copilot</span>
-                                  
-                                      <span class="topic">development</span>
-                                  
-                                      <span class="topic">devtools</span>
-                                  
-                                      <span class="topic">gpt</span>
-                                  
-                                      <span class="topic">gpt-4</span>
-                                  
-                                      <span class="topic">javascript</span>
-                                  
-                                      <span class="topic">llm</span>
-                                  
-                                      <span class="topic">nextjs</span>
-                                  
-                                      <span class="topic">openai</span>
-                                  
-                                      <span class="topic">python</span>
-                                  
-                                      <span class="topic">react</span>
-                                  
-                                      <span class="topic">software</span>
-                                  
-                                      <span class="topic">typescript</span>
-                                  
-                              </div>
-                          </td>
-                          <td class="score">3044.31</td>
-                      </tr>
-                  
-                      <tr>
-                          <td><a href="https://github.com/e2b-dev/e2b-cookbook" target="_blank">e2b-cookbook</a></td>
-                          <td>791</td>
-                          <td>135</td>
-                          <td>791</td>
-                          <td>9/27/2023</td>
-                          <td>1/10/2025</td>
-                          <td>
-                              <div class="topics">
-                                  
-                                      <span class="topic">agent</span>
-                                  
-                                      <span class="topic">ai</span>
-                                  
-                                      <span class="topic">ai-agents</span>
-                                  
-                                      <span class="topic">code-interpreter</span>
-                                  
-                                      <span class="topic">cookbook</span>
-                                  
-                                      <span class="topic">devtools</span>
-                                  
-                                      <span class="topic">e2b</span>
-                                  
-                                      <span class="topic">example</span>
-                                  
-                                      <span class="topic">gpt</span>
-                                  
-                                      <span class="topic">gpt4</span>
-                                  
-                                      <span class="topic">guides</span>
-                                  
-                                      <span class="topic">javascript</span>
-                                  
-                                      <span class="topic">llm</span>
-                                  
-                                      <span class="topic">openai</span>
-                                  
-                                      <span class="topic">python</span>
-                                  
-                                      <span class="topic">python3</span>
-                                  
-                                      <span class="topic">sdk</span>
-                                  
-                                      <span class="topic">tutorial</span>
-                                  
-                                      <span class="topic">typescript</span>
-                                  
-                              </div>
-                          </td>
-                          <td class="score">375.97</td>
-                      </tr>
-                  
-                      <tr>
-                          <td><a href="https://github.com/e2b-dev/awesome-sdks-for-ai-agents" target="_blank">awesome-ai-sdks</a></td>
-                          <td>822</td>
-                          <td>71</td>
-                          <td>822</td>
-                          <td>8/5/2023</td>
-                          <td>1/10/2025</td>
-                          <td>
-                              <div class="topics">
-                                  
-                                      <span class="topic">agent</span>
-                                  
-                                      <span class="topic">agentops</span>
-                                  
-                                      <span class="topic">agents</span>
-                                  
-                                      <span class="topic">ai</span>
-                                  
-                                      <span class="topic">ai-agents</span>
-                                  
-                                      <span class="topic">awesome</span>
-                                  
-                                      <span class="topic">awesome-list</span>
-                                  
-                                      <span class="topic">chatgpt</span>
-                                  
-                                      <span class="topic">e2b</span>
-                                  
-                                      <span class="topic">framework</span>
-                                  
-                                      <span class="topic">langchain</span>
-                                  
-                                      <span class="topic">llama-index</span>
-                                  
-                                      <span class="topic">llm</span>
-                                  
-                                      <span class="topic">llmops</span>
-                                  
-                                      <span class="topic">openai</span>
-                                  
-                                      <span class="topic">sdk</span>
-                                  
-                                      <span class="topic">tools</span>
-                                  
-                                      <span class="topic">vercel</span>
-                                  
-                              </div>
-                          </td>
-                          <td class="score">375.86</td>
-                      </tr>
-                  
-              </tbody>
-          </table>
-      </div>
-  </body>
-  </html>
-  
+            </tbody>
+        </table>
+    </div>
+    <script>
+    function toggleTheme() {
+      const html = document.documentElement;
+      const currentTheme = html.getAttribute('data-theme');
+      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+      html.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      
+      updateThemeIcon(newTheme);
+    }
+
+    function updateThemeIcon(theme) {
+      const icon = document.getElementById('theme-icon');
+      const sunIcon = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+      const moonIcon = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+      icon.innerHTML = theme === 'dark' ? sunIcon : moonIcon;
+    }
+
+    // Set initial theme and icon
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateThemeIcon(savedTheme);
+  </script>
+</body>
+</html>
