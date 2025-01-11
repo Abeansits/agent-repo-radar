@@ -22,6 +22,55 @@ function generateTableRows(repos: Repo[]): string {
     `).join('');
   }
   
+  function getSortingScript(): string {
+    return `
+      document.querySelectorAll('th[data-sort]').forEach(th => {
+        th.addEventListener('click', () => {
+          const table = th.closest('table');
+          const tbody = table.querySelector('tbody');
+          const rows = Array.from(tbody.querySelectorAll('tr'));
+          const sortKey = th.dataset.sort;
+          const isAsc = !th.classList.contains('asc');
+          
+          table.querySelectorAll('th').forEach(header => {
+            header.classList.remove('asc', 'desc');
+          });
+          
+          th.classList.add(isAsc ? 'asc' : 'desc');
+          
+          rows.sort((a, b) => {
+            let aVal = a.querySelector(\`td:nth-child(\${th.cellIndex + 1})\`).innerText;
+            let bVal = b.querySelector(\`td:nth-child(\${th.cellIndex + 1})\`).innerText;
+            
+            if (sortKey === 'stars' || sortKey === 'forks' || sortKey === 'watchers' || sortKey === 'score') {
+              aVal = parseFloat(aVal.replace(/,/g, ''));
+              bVal = parseFloat(bVal.replace(/,/g, ''));
+            }
+            else if (sortKey === 'created' || sortKey === 'updated') {
+              aVal = new Date(aVal);
+              bVal = new Date(bVal);
+            }
+            
+            if (aVal < bVal) return isAsc ? -1 : 1;
+            if (aVal > bVal) return isAsc ? 1 : -1;
+            return 0;
+          });
+          
+          rows.forEach(row => tbody.appendChild(row));
+        });
+      });
+    `;
+  }
+
+  function getToggleScoringScript(): string {
+    return `
+      function toggleScoring() {
+        const scoringInfo = document.getElementById('scoring-info');
+        scoringInfo.classList.toggle('hidden');
+      }
+    `;
+  }
+
   function getStyles(): string {
     return `
       :root {
@@ -252,12 +301,172 @@ function generateTableRows(repos: Repo[]): string {
         overflow: hidden;
         text-overflow: ellipsis;
         display: -webkit-box;
-        -webkit-line-clamp: 2;
+        -webkit-line-clamp: 3;
         -webkit-box-orient: vertical;
       }
   
       td:first-child {
         padding-right: 2rem;
+      }
+
+      .info-section {
+        margin: 2rem 0;
+      }
+
+      .info-button {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--text);
+        cursor: pointer;
+        font-family: var(--font-mono);
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+      }
+
+      .info-button:hover {
+        background: var(--hover);
+        transform: translateX(4px);
+      }
+
+      .info-icon {
+        width: 16px;
+        height: 16px;
+      }
+
+      .scoring-info {
+        margin-top: 1rem;
+        padding: 1.5rem;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        transition: all 0.3s ease;
+      }
+
+      .scoring-info.hidden {
+        display: none;
+      }
+
+      .scoring-info h3 {
+        color: var(--primary);
+        margin-bottom: 1rem;
+        font-size: 1.25rem;
+      }
+
+      .scoring-info ul {
+        list-style: none;
+        padding: 0;
+        margin: 1rem 0;
+      }
+
+      .scoring-info li {
+        margin: 0.5rem 0;
+        padding-left: 1.5rem;
+        position: relative;
+      }
+
+      .scoring-info li:before {
+        content: "•";
+        color: var(--primary);
+        position: absolute;
+        left: 0;
+      }
+
+      .github-link {
+        color: var(--primary);
+        text-decoration: none;
+        font-family: var(--font-mono);
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+      }
+
+      .github-link:hover {
+        text-decoration: underline;
+      }
+
+      .sort-arrow {
+        display: inline-block;
+        margin-left: 0.25rem;
+        opacity: 0.5;
+      }
+
+      th[data-sort] {
+        cursor: pointer;
+      }
+
+      th[data-sort].asc .sort-arrow {
+        opacity: 1;
+        transform: rotate(180deg);
+      }
+
+      th[data-sort].desc .sort-arrow {
+        opacity: 1;
+      }
+
+      .footer {
+        text-align: center;
+        margin-top: 3rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border);
+        color: var(--text-secondary);
+        font-family: var(--font-mono);
+        font-size: 0.875rem;
+      }
+
+      .footer-links {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .footer-date {
+        color: var(--text-secondary);
+      }
+
+      .description p {
+        color: var(--text-secondary);
+        font-size: 1rem;
+        line-height: 1.6;
+        max-width: 800px;
+        margin: 0 auto;
+      }
+
+      .scoring-info p {
+        color: var(--text-secondary);
+        font-size: 1rem;
+        line-height: 1.6;
+      }
+
+      .scoring-info li {
+        color: var(--text-secondary);
+        margin: 0.75rem 0;
+        padding-left: 1.5rem;
+        position: relative;
+        font-size: 1rem;
+      }
+
+      table tr:last-child td {
+        border-bottom: none;
+      }
+
+      .footer-links iframe {
+        transform: scale(0.65);
+        transform-origin: center;
+        margin: -10px -20px;
+      }
+
+      .coffee-button-wrapper {
+        transform: scale(0.65);
+        transform-origin: left center;
+        height: 40px;
+        display: flex;
+        align-items: center;
       }
     `;
   }
@@ -313,26 +522,78 @@ function generateTableRows(repos: Repo[]): string {
             <img src="./public/images/logo.png" alt="Agent Repo Radar Logo" width="200">
         </div>
           <h1>AI Agent Repo Radar</h1>
-          <div class="subtitle">Scanning the AI Agent Landscape</div>
+          <div class="subtitle">Scanning the AI Agent Landscape So You Don't Have To</div>
+
+        <div class="description">
+            <p>AI Agent Repo Radar helps you discover the most impactful AI agent repositories on GitHub. Our scoring algorithm analyzes community engagement, maintenance patterns, and topic relevance to surface the projects that matter most.</p>
+        </div>
+
+        <div class="info-section">
+            <button class="info-button" onclick="toggleScoring()">
+                <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="16" x2="12" y2="12"/>
+                    <line x1="12" y1="8" x2="12" y2="8"/>
+                </svg>
+                How are repositories scored?
+            </button>
+            <div id="scoring-info" class="scoring-info hidden">
+                <h3>Repository Scoring Criteria</h3>
+                <p>Our algorithm weighs multiple factors to determine a repository's value:</p>
+                <ul>
+                    <li>Stars (25%): Community interest and approval</li>
+                    <li>Forks (20%): Developer engagement and usage</li>
+                    <li>Watchers (15%): Active following</li>
+                    <li>Recent Activity (15%): Maintenance and updates</li>
+                    <li>Topic Coverage (15%): Relevance to AI agents</li>
+                    <li>Repository Age (10%): Project maturity</li>
+                </ul>
+            </div>
+        </div>
+
           <table>
               <thead>
                   <tr>
-                      <th style="width: 30%">Repository</th>
-                      <th>Stars</th>
-                      <th>Forks</th>
-                      <th>Watchers</th>
-                      <th>Created</th>
-                      <th>Last Update</th>
-                      <th>Topics</th>
-                      <th>Score</th>
+                    <th style="width: 22%" data-sort="name">Repository <span class="sort-arrow">↕</span></th>
+                    <th style="width: 9%" data-sort="stars">Stars <span class="sort-arrow">↕</span></th>
+                    <th style="width: 9%" data-sort="forks">Forks <span class="sort-arrow">↕</span></th>
+                    <th style="width: 10%" data-sort="watchers">Watchers <span class="sort-arrow">↕</span></th>
+                    <th style="width: 9%" data-sort="created">Created <span class="sort-arrow">↕</span></th>
+                    <th style="width: 10%" data-sort="updated">Updated <span class="sort-arrow">↕</span></th>
+                    <th style="width: 19%">Topics</th>
+                    <th style="width: 12%" data-sort="score">Score <span class="sort-arrow">↕</span></th>
                   </tr>
               </thead>
               <tbody>
                   ${generateTableRows(repos)}
               </tbody>
           </table>
+
+        <div class="footer">
+          <div class="footer-links">
+            <a href="https://github.com/Abeansits/agent-repo-radar" target="_blank" class="github-link">
+              View source on GitHub →
+            </a>
+            <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" 
+              data-name="bmc-button" 
+              data-slug="abeansits" 
+              data-color="#60a5fa" 
+              data-emoji=""  
+              data-font="Inter" 
+              data-text="Buy me a coffee" 
+              data-outline-color="#334155" 
+              data-font-color="#ffffff" 
+              data-coffee-color="#0f172a" 
+              data-height="40"
+              data-width="150">
+            </script>
+          </div>
+          <p class="footer-date">Last updated: ${new Date().toLocaleDateString()}</p>
+        </div>
       </div>
       <script>${getThemeScript()}</script>
+      <script>${getSortingScript()}</script>
+      <script>${getToggleScoringScript()}</script>
   </body>
   </html>`;
   }
