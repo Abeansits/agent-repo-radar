@@ -1,6 +1,6 @@
 # GitHub Repository Analyzer
 
-A tool that aggregates and analyzes GitHub repositories from multiple "awesome" lists, helping you discover and evaluate AI-related projects based on quantitative metrics.
+A tool that aggregates and analyzes GitHub repositories from multiple sources including "awesome" lists, helping you discover and evaluate AI-agent-related projects based on quantitative metrics.
 
 ## Background
 
@@ -28,6 +28,8 @@ The aggregate score for each repository is calculated using the following weight
 This scoring system aims to balance popularity (stars, forks, watchers) with project maturity (age) and maintenance status (recent updates).
 
 ## Usage
+
+In case you want to run the tool locally or somewhere else, you can do so by following these steps:
 
 1. Set your GitHub API token:
 
