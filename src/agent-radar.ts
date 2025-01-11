@@ -55,7 +55,7 @@ function parseArgs(): CliArgs {
   if (!parsedArgs.urlFile) {
     throw new Error(
       'Please provide the required parameters:\n' +
-      'Usage: ts-node src/agent_parser.ts --url-file <path> [--format markdown|html] [--max-calls <number>]\n' +
+      'Usage: ts-node src/agent-radar.ts --url-file <path> [--format markdown|html] [--max-calls <number>]\n' +
       '  --url-file, -f    : Path to the file containing URLs\n' +
       '  --format, -o      : Output format "markdown" or "html" (default: markdown)\n' +
       '  --max-calls, -m   : Maximum number of GitHub API calls (default: 5)'
@@ -66,6 +66,18 @@ function parseArgs(): CliArgs {
 }
 
 async function main() {
+  console.log(`
+    ╭─────────────────────────────────────╮
+    │                                     │
+    │      🎯 AI Agent Repo Radar         │
+    │                                     │
+    │      Scanning the AI landscape      │
+    │      for remarkable repos...        │
+    │                                     │
+    ╰─────────────────────────────────────╯
+  `);
+  console.log('\nInitializing scan...\n');
+
   try {
     const args = parseArgs();
     
@@ -137,4 +149,4 @@ async function main() {
   }
 }
 
-main(); 
+main();

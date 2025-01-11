@@ -1,4 +1,4 @@
-# GitHub Repository Analyzer
+# Agent Repository Radar
 
 A tool that aggregates and analyzes GitHub repositories from multiple sources including "awesome" lists, helping you discover and evaluate AI-agent-related projects based on quantitative metrics.
 
@@ -47,14 +47,14 @@ echo "https://raw.githubusercontent.com/user/repo/main/awesome-list.md" > source
 
 ```bash
 # Basic usage (defaults to markdown output and 5 API calls)
-ts-node src/agent_parser.ts sources.txt
+ts-node src/agent-radar.ts sources.txt
 
 # Specify output format (markdown or html)
-ts-node src/agent_parser.ts sources.txt html
+ts-node src/agent-radar.ts sources.txt html
 
 # Specify output format and max API calls
-ts-node src/agent_parser.ts sources.txt markdown 10
-ts-node src/agent_parser.ts sources.txt html 15
+ts-node src/agent-radar.ts sources.txt markdown 10
+ts-node src/agent-radar.ts sources.txt html 15
 ```
 
 ### Parameters
